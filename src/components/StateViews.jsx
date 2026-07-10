@@ -14,7 +14,9 @@ export function NoRecord({ debug }) {
       <p className="state__message">No Flodesk record found</p>
       {debug && (
         <pre style={{ fontSize: 10, whiteSpace: 'pre-wrap', color: '#9ca3af' }}>
-          {debug.status}: {debug.body}
+          lookup {debug.status}: {debug.body}
+          {'\n\n'}
+          auth check {debug.authCheckStatus}: {debug.authCheckBody}
         </pre>
       )}
     </div>

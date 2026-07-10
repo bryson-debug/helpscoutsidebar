@@ -24,15 +24,16 @@ npm run build
 
 Required env vars — see `.env.example`. All must be set in Vercel's project settings for the deployment, never hardcoded.
 
-## Open items to confirm live (see spec §12)
+## Open items
 
-These couldn't be verified against live docs while building (see comments at each call site) — confirm during the credentials walkthrough before going live:
+1. **Flodesk subscriber profile URL** (`src/lib/flodeskProfileUrl.js`) — "View in Flodesk" link format is still a best guess; compare against a real subscriber page in the Flodesk web app and fix if wrong.
 
-1. **Flodesk segment removal endpoint** (`lib/flodeskClient.js`) — implemented as the symmetric `DELETE /v1/subscribers/{email}/segments` counterpart to the documented add endpoint; not independently confirmed.
-2. **Flodesk rate limits** — no published number found; the spec's 60s cache is a reasonable safety margin regardless.
-3. **Flodesk subscriber profile URL** (`src/lib/flodeskProfileUrl.js`) — "View in Flodesk" link format is a best guess; compare against a real subscriber page in the Flodesk web app.
-
-Resolved during the live walkthrough: HelpScout's signature shape and query param names (`conversation-id`, `customer-id`, `mailbox-id`, `user-id`, etc.) were confirmed against a real request. The Tarbet Education Network mailbox's numeric ID is `364558` — set `ALLOWED_MAILBOX_ID=364558` in Vercel for a more robust guard than name-matching.
+Resolved against the real Flodesk OpenAPI spec and live requests:
+- HelpScout's signature shape and query param names (`conversation-id`, `customer-id`, `mailbox-id`, `user-id`, etc.) — confirmed against a real request. The Tarbet Education Network mailbox's numeric ID is `364558` — set `ALLOWED_MAILBOX_ID=364558` in Vercel for a more robust guard than name-matching.
+- Flodesk's segment add/remove endpoints (`POST`/`DELETE /v1/subscribers/{id_or_email}/segments`, body `{segment_ids: [...]}`) — both confirmed correct as originally implemented.
+- Flodesk rate limits: **100 requests/minute per endpoint** (lower, 20/min, for the batch subscriber endpoint specifically, which this app doesn't use) — comfortably covered by the 60s cache.
+- Flodesk requires a `User-Agent` header on every request (shown in all their curl examples) — added to `lib/flodeskClient.js`; its absence may have been the cause of unexpected 404s during testing.
+- `GET /v1/segments` is paginated (max 100/page) — `listAllSegments` now loops through all pages so the add-segment typeahead never silently misses segments beyond the first page.
 
 ## Testing
 

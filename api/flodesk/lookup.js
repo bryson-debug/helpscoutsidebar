@@ -39,11 +39,26 @@ export default async function handler(req, res) {
     // confirmed.
     let debug = null
     if (!subscriber) {
+      const authHeaders = {
+        Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`,
+        'User-Agent': 'HelpScout Flodesk Sidebar (helpscoutsidebar.vercel.app)',
+      }
       const rawRes = await fetch(`https://api.flodesk.com/v1/subscribers/${encodeURIComponent(email)}`, {
-        headers: { Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}` },
+        headers: authHeaders,
       })
       const rawBody = await rawRes.text()
-      debug = { status: rawRes.status, body: rawBody }
+
+      // Sanity check: does the API key work at all against a lightweight
+      // authenticated endpoint?
+      const authCheckRes = await fetch('https://api.flodesk.com/v1/segments?per_page=1', { headers: authHeaders })
+      const authCheckBody = await authCheckRes.text()
+
+      debug = {
+        status: rawRes.status,
+        body: rawBody,
+        authCheckStatus: authCheckRes.status,
+        authCheckBody: authCheckBody.slice(0, 300),
+      }
     }
 
     let allSegments = cacheGet('segments:all')

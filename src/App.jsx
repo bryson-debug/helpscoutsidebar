@@ -5,6 +5,7 @@ import { colorForSegment } from './lib/colors.js'
 import { flodeskProfileUrl } from './lib/flodeskProfileUrl.js'
 import SegmentPill from './components/SegmentPill.jsx'
 import AddSegmentTypeahead from './components/AddSegmentTypeahead.jsx'
+import StatusBadge from './components/StatusBadge.jsx'
 import { Loading, NoRecord, ErrorState, MailboxBlocked } from './components/StateViews.jsx'
 
 const SHOW_LIMIT = 8
@@ -212,11 +213,14 @@ export default function App() {
             disabled={committing}
           />
 
-          {profileUrl && (
-            <a className="button button--secondary" href={profileUrl} target="_blank" rel="noreferrer">
-              View in Flodesk
-            </a>
-          )}
+          <div className="profile-row">
+            <StatusBadge status={subscriber?.status} />
+            {profileUrl && (
+              <a className="button button--secondary" href={profileUrl} target="_blank" rel="noreferrer">
+                View in Flodesk
+              </a>
+            )}
+          </div>
         </>
       )}
     </div>

@@ -13,15 +13,6 @@ body {
   padding: 12px 4px;
 }
 
-.heading {
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  color: #6b7280;
-  margin: 0 0 10px;
-}
-
 .pill-list {
   display: flex;
   flex-wrap: wrap;

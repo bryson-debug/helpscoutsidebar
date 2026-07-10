@@ -150,8 +150,6 @@ export default function App() {
 
   return (
     <div className="sidebar" ref={rootRef}>
-      <h2 className="heading">Flodesk</h2>
-
       {banner && <div className={`banner banner--${banner.type}`}>{banner.text}</div>}
 
       {phase === 'no-record' && <NoRecord debug={debugInfo} />}

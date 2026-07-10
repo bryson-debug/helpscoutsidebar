@@ -16,7 +16,18 @@ export default async function handler(req, res) {
     })
 
     if (!verified) {
-      res.status(401).send('Invalid signature')
+      // TEMPORARY: dump what HelpScout actually sent so we can confirm the
+      // real signature shape instead of guessing. Remove once confirmed.
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+      res.status(401).send(
+        [
+          'Invalid signature',
+          '',
+          `method: ${req.method}`,
+          `headers: ${JSON.stringify(req.headers, null, 2)}`,
+          `query: ${JSON.stringify(query, null, 2)}`,
+        ].join('\n')
+      )
       return
     }
 

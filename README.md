@@ -8,7 +8,7 @@ Built against `HelpScoutFlodeskSidebarSpec.md`. This app is scoped to Tarbet Edu
 
 - **Frontend**: React (Vite), served as a fully custom iframe app via HelpScout's [App Developer Platform](https://developer.helpscout.com/apps/) — not the legacy static/JSON "Dynamic App" content blocks, which strip JS and can't support the two-tap stage/confirm, typeahead, or inline pill removal this spec needs.
 - **Backend**: Vercel serverless functions under `/api`.
-  - `api/app.js` — the HelpScout "Callback URL". Verifies `X-HelpScout-Signature` (HMAC-SHA1 with the app's Secret Key), then serves the HTML shell with a short-lived session token embedded.
+  - `api/app.js` — the HelpScout "Content URL". Verifies `X-HelpScout-Signature` (a query param — confirmed live: `base64(HMAC-SHA1(secret, JSON.stringify(other params, original order)))`, per `lib/helpscoutSignature.js`), then serves the HTML shell with a short-lived session token embedded.
   - `api/flodesk/lookup.js` — subscriber + segment lookup (session-token authed).
   - `api/flodesk/segments.js` — add/remove segment (session-token authed, rate-limited, stale-write checked, audit-logged).
 - **Auth model**: HelpScout's signature only covers the initial iframe load. The iframe's own JS calls back to `/api/flodesk/*` using a separate short-lived JWT (`SESSION_TOKEN_SECRET`) minted at that initial load — this is what actually gates the lookup/write endpoints.
@@ -31,8 +31,8 @@ These couldn't be verified against live docs while building (see comments at eac
 1. **Flodesk segment removal endpoint** (`lib/flodeskClient.js`) — implemented as the symmetric `DELETE /v1/subscribers/{email}/segments` counterpart to the documented add endpoint; not independently confirmed.
 2. **Flodesk rate limits** — no published number found; the spec's 60s cache is a reasonable safety margin regardless.
 3. **Flodesk subscriber profile URL** (`src/lib/flodeskProfileUrl.js`) — "View in Flodesk" link format is a best guess; compare against a real subscriber page in the Flodesk web app.
-4. **HelpScout callback query params** (`api/app.js`) — the conversation ID param name on the initial signed request is a guess; the frontend's `getApplicationContext()` call is the authoritative source either way, so this only affects an audit-log fallback value.
-5. **HelpScout signature shape** (`lib/helpscoutSignature.js`) — verifies both a body-based and query-based HMAC since it wasn't confirmed which the current platform sends; drop the unused branch once confirmed.
+
+Resolved during the live walkthrough: HelpScout's signature shape and query param names (`conversation-id`, `customer-id`, `mailbox-id`, `user-id`, etc.) were confirmed against a real request. The Tarbet Education Network mailbox's numeric ID is `364558` — set `ALLOWED_MAILBOX_ID=364558` in Vercel for a more robust guard than name-matching.
 
 ## Testing
 

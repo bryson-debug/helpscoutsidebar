@@ -32,8 +32,9 @@ Resolved against the real Flodesk OpenAPI spec and live requests:
 - HelpScout's signature shape and query param names (`conversation-id`, `customer-id`, `mailbox-id`, `user-id`, etc.) — confirmed against a real request. The Tarbet Education Network mailbox's numeric ID is `364558` — set `ALLOWED_MAILBOX_ID=364558` in Vercel for a more robust guard than name-matching.
 - Flodesk's segment add/remove endpoints (`POST`/`DELETE /v1/subscribers/{id_or_email}/segments`, body `{segment_ids: [...]}`) — both confirmed correct as originally implemented.
 - Flodesk rate limits: **100 requests/minute per endpoint** (lower, 20/min, for the batch subscriber endpoint specifically, which this app doesn't use) — comfortably covered by the 60s cache.
-- Flodesk requires a `User-Agent` header on every request (shown in all their curl examples) — added to `lib/flodeskClient.js`; its absence may have been the cause of unexpected 404s during testing.
+- Flodesk requires a `User-Agent` header on every request (shown in all their curl examples) — added to `lib/flodeskClient.js`.
 - `GET /v1/segments` is paginated (max 100/page) — `listAllSegments` now loops through all pages so the add-segment typeahead never silently misses segments beyond the first page.
+- Flodesk's router doesn't decode a percent-encoded `@` (`%40`) back to the literal character for `/subscribers/{id_or_email}` — a fully URL-encoded email 404s even for a real, active subscriber, while the same email with a literal `@` succeeds. This was the actual cause of every "no record found" false negative during testing. Fixed via `encodeEmailForPath()` in `lib/flodeskClient.js`, which encodes everything except `@`.
 
 ## Testing
 

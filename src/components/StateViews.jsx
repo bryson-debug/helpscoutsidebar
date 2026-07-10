@@ -8,19 +8,10 @@ export function Loading() {
   )
 }
 
-export function NoRecord({ debug }) {
+export function NoRecord() {
   return (
     <div className="state">
       <p className="state__message">No Flodesk record found</p>
-      {debug && (
-        <pre style={{ fontSize: 10, whiteSpace: 'pre-wrap', color: '#9ca3af' }}>
-          requested email: {debug.requestedEmailJson}
-          {'\n\n'}
-          encoded path {debug.encodedPathStatus}: {debug.encodedPathBody}
-          {'\n\n'}
-          raw path {debug.rawPathStatus}: {debug.rawPathBody}
-        </pre>
-      )}
     </div>
   )
 }

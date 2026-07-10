@@ -33,36 +33,6 @@ export default async function handler(req, res) {
       cacheSet(subscriberCacheKey, subscriber, SUBSCRIBER_TTL_MS)
     }
 
-    // TEMPORARY: capture Flodesk's raw response when we're about to report
-    // "no record found", so we can see the actual status/body instead of
-    // guessing why a known-real subscriber isn't matching. Remove once
-    // confirmed.
-    let debug = null
-    if (!subscriber) {
-      const authHeaders = {
-        Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`,
-        'User-Agent': 'HelpScout Flodesk Sidebar (helpscoutsidebar.vercel.app)',
-      }
-
-      const encodedRes = await fetch(`https://api.flodesk.com/v1/subscribers/${encodeURIComponent(email)}`, {
-        headers: authHeaders,
-      })
-      const encodedBody = await encodedRes.text()
-
-      const rawRes = await fetch(`https://api.flodesk.com/v1/subscribers/${email}`, {
-        headers: authHeaders,
-      })
-      const rawBody = await rawRes.text()
-
-      debug = {
-        requestedEmailJson: JSON.stringify(email),
-        encodedPathStatus: encodedRes.status,
-        encodedPathBody: encodedBody,
-        rawPathStatus: rawRes.status,
-        rawPathBody: rawBody,
-      }
-    }
-
     let allSegments = cacheGet('segments:all')
     if (allSegments === undefined) {
       allSegments = await listAllSegments(apiKey)
@@ -79,7 +49,7 @@ export default async function handler(req, res) {
       })),
     }
 
-    res.status(200).json({ subscriber: coloredSubscriber, allSegments: coloredAllSegments, debug })
+    res.status(200).json({ subscriber: coloredSubscriber, allSegments: coloredAllSegments })
   } catch (err) {
     res.status(502).json({ error: 'Flodesk lookup failed', detail: err.message })
   }

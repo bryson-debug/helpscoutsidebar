@@ -43,21 +43,23 @@ export default async function handler(req, res) {
         Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`,
         'User-Agent': 'HelpScout Flodesk Sidebar (helpscoutsidebar.vercel.app)',
       }
-      const rawRes = await fetch(`https://api.flodesk.com/v1/subscribers/${encodeURIComponent(email)}`, {
+
+      const encodedRes = await fetch(`https://api.flodesk.com/v1/subscribers/${encodeURIComponent(email)}`, {
+        headers: authHeaders,
+      })
+      const encodedBody = await encodedRes.text()
+
+      const rawRes = await fetch(`https://api.flodesk.com/v1/subscribers/${email}`, {
         headers: authHeaders,
       })
       const rawBody = await rawRes.text()
 
-      // Sanity check: does the API key work at all against a lightweight
-      // authenticated endpoint?
-      const authCheckRes = await fetch('https://api.flodesk.com/v1/segments?per_page=1', { headers: authHeaders })
-      const authCheckBody = await authCheckRes.text()
-
       debug = {
-        status: rawRes.status,
-        body: rawBody,
-        authCheckStatus: authCheckRes.status,
-        authCheckBody: authCheckBody.slice(0, 300),
+        requestedEmailJson: JSON.stringify(email),
+        encodedPathStatus: encodedRes.status,
+        encodedPathBody: encodedBody,
+        rawPathStatus: rawRes.status,
+        rawPathBody: rawBody,
       }
     }
 

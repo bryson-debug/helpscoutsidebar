@@ -8,10 +8,15 @@ export function Loading() {
   )
 }
 
-export function NoRecord() {
+export function NoRecord({ debug }) {
   return (
     <div className="state">
       <p className="state__message">No Flodesk record found</p>
+      {debug && (
+        <pre style={{ fontSize: 10, whiteSpace: 'pre-wrap', color: '#9ca3af' }}>
+          {debug.status}: {debug.body}
+        </pre>
+      )}
     </div>
   )
 }

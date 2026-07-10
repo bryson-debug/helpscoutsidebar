@@ -33,6 +33,19 @@ export default async function handler(req, res) {
       cacheSet(subscriberCacheKey, subscriber, SUBSCRIBER_TTL_MS)
     }
 
+    // TEMPORARY: capture Flodesk's raw response when we're about to report
+    // "no record found", so we can see the actual status/body instead of
+    // guessing why a known-real subscriber isn't matching. Remove once
+    // confirmed.
+    let debug = null
+    if (!subscriber) {
+      const rawRes = await fetch(`https://api.flodesk.com/v1/subscribers/${encodeURIComponent(email)}`, {
+        headers: { Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}` },
+      })
+      const rawBody = await rawRes.text()
+      debug = { status: rawRes.status, body: rawBody }
+    }
+
     let allSegments = cacheGet('segments:all')
     if (allSegments === undefined) {
       allSegments = await listAllSegments(apiKey)
@@ -49,7 +62,7 @@ export default async function handler(req, res) {
       })),
     }
 
-    res.status(200).json({ subscriber: coloredSubscriber, allSegments: coloredAllSegments })
+    res.status(200).json({ subscriber: coloredSubscriber, allSegments: coloredAllSegments, debug })
   } catch (err) {
     res.status(502).json({ error: 'Flodesk lookup failed', detail: err.message })
   }

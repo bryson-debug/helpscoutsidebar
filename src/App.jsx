@@ -25,6 +25,7 @@ export default function App() {
   const [stage, setStage] = useState(null)
   const [committing, setCommitting] = useState(false)
   const [banner, setBanner] = useState(null)
+  const [debugInfo, setDebugInfo] = useState(null)
   const identityRef = useRef({})
   const rootRef = useRef(null)
 
@@ -53,7 +54,7 @@ export default function App() {
         return
       }
 
-      const { subscriber, allSegments } = await lookupSubscriber({
+      const { subscriber, allSegments, debug } = await lookupSubscriber({
         email,
         mailboxName: mailbox?.name,
         mailboxId: mailbox?.id,
@@ -61,6 +62,7 @@ export default function App() {
 
       setAllSegments(allSegments)
       if (!subscriber) {
+        setDebugInfo(debug)
         setPhase('no-record')
         return
       }
@@ -152,7 +154,7 @@ export default function App() {
 
       {banner && <div className={`banner banner--${banner.type}`}>{banner.text}</div>}
 
-      {phase === 'no-record' && <NoRecord />}
+      {phase === 'no-record' && <NoRecord debug={debugInfo} />}
 
       {phase === 'ready' && (
         <>

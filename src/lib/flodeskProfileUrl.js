@@ -1,7 +1,5 @@
-// NOTE: Flodesk's exact subscriber-profile URL format wasn't confirmed
-// against live docs/UI. Verify this during the credentials walkthrough
-// (open the subscriber in the Flodesk web app and compare) and adjust.
+// Confirmed live against a real subscriber page in the Flodesk web app.
 export function flodeskProfileUrl(subscriber) {
   if (!subscriber?.id) return null
-  return `https://app.flodesk.com/audience/subscribers/${subscriber.id}`
+  return `https://app.flodesk.com/subscriber/${subscriber.id}/overview`
 }

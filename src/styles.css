@@ -156,10 +156,6 @@ body {
   text-decoration: none;
 }
 
-.button--link {
-  color: #2563eb;
-}
-
 .button--secondary {
   border: 1px solid #d1d5db;
   background: white;

@@ -213,7 +213,7 @@ export default function App() {
           />
 
           {profileUrl && (
-            <a className="button button--link" href={profileUrl} target="_blank" rel="noreferrer">
+            <a className="button button--secondary" href={profileUrl} target="_blank" rel="noreferrer">
               View in Flodesk
             </a>
           )}

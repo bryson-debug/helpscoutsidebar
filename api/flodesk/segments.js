@@ -74,29 +74,29 @@ export default async function handler(req, res) {
     } else {
       await removeSubscriberFromSegments(apiKey, email, [segmentId])
     }
+
+    cacheDelete(`subscriber:${email}`)
+
+    try {
+      await appendAuditLogRow({
+        agentEmail: agentEmail || 'unknown',
+        customerEmail: email,
+        segmentName: segmentName || segmentId,
+        action,
+        conversationId: session.conversationId || 'unknown',
+      })
+    } catch (err) {
+      console.error('audit log append failed', err)
+    }
+
+    const refreshed = await getSubscriberByEmail(apiKey, email)
+    cacheSet(`subscriber:${email}`, refreshed, SUBSCRIBER_TTL_MS)
+
+    res.status(200).json({ subscriber: refreshed })
   } catch (err) {
+    console.error('api/flodesk/segments crashed', err)
     res.status(502).json({ error: 'Flodesk write failed', detail: err.message })
-    return
   }
-
-  cacheDelete(`subscriber:${email}`)
-
-  try {
-    await appendAuditLogRow({
-      agentEmail: agentEmail || 'unknown',
-      customerEmail: email,
-      segmentName: segmentName || segmentId,
-      action,
-      conversationId: session.conversationId || 'unknown',
-    })
-  } catch (err) {
-    console.error('audit log append failed', err)
-  }
-
-  const refreshed = await getSubscriberByEmail(apiKey, email)
-  cacheSet(`subscriber:${email}`, refreshed, SUBSCRIBER_TTL_MS)
-
-  res.status(200).json({ subscriber: refreshed })
 }
 
 function arraysEqual(a, b) {

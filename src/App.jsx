@@ -216,7 +216,7 @@ export default function App() {
           <div className="profile-row">
             <StatusBadge status={subscriber?.status} />
             {profileUrl && (
-              <a className="button button--secondary" href={profileUrl} target="_blank" rel="noreferrer">
+              <a className="button button--flodesk" href={profileUrl} target="_blank" rel="noreferrer">
                 View in Flodesk
               </a>
             )}

@@ -158,6 +158,8 @@ export default function App() {
           {sortedSegments.length === 0 && <p className="empty-note">No segments yet</p>}
 
           <div className="pill-list">
+            <StatusBadge status={subscriber?.status} />
+
             {visibleSegments.map((segment) => (
               <SegmentPill
                 key={segment.id}
@@ -213,14 +215,11 @@ export default function App() {
             disabled={committing}
           />
 
-          <div className="profile-row">
-            <StatusBadge status={subscriber?.status} />
-            {profileUrl && (
-              <a className="button button--flodesk" href={profileUrl} target="_blank" rel="noreferrer">
-                View in Flodesk
-              </a>
-            )}
-          </div>
+          {profileUrl && (
+            <a className="button button--flodesk" href={profileUrl} target="_blank" rel="noreferrer">
+              View in Flodesk
+            </a>
+          )}
         </>
       )}
     </div>

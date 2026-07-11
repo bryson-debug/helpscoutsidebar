@@ -32,6 +32,7 @@ body {
   color: color-mix(in srgb, var(--pill-color) 70%, black);
   font-weight: 500;
   line-height: 1.6;
+  text-transform: uppercase;
   transition: opacity 0.15s, border-color 0.15s;
 }
 
@@ -181,6 +182,7 @@ body {
   border-radius: 999px;
   cursor: default;
   white-space: nowrap;
+  text-transform: uppercase;
 }
 
 .status-badge--active {

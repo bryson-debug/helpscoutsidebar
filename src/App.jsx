@@ -36,6 +36,7 @@ export default function App() {
   const [stage, setStage] = useState(null)
   const [committing, setCommitting] = useState(false)
   const [banner, setBanner] = useState(null)
+  const [mailboxDebug, setMailboxDebug] = useState(null)
   const identityRef = useRef({})
   const rootRef = useRef(null)
 
@@ -53,6 +54,12 @@ export default function App() {
       }
 
       if (!isAllowedMailbox(mailbox)) {
+        setMailboxDebug({
+          mailboxName: mailbox?.name,
+          mailboxId: mailbox?.id,
+          allowedMailboxName: clientConfig.allowedMailboxName,
+          allowedMailboxId: clientConfig.allowedMailboxId,
+        })
         setPhase('mailbox-blocked')
         return
       }
@@ -152,7 +159,7 @@ export default function App() {
   }
 
   if (phase === 'loading') return <Loading />
-  if (phase === 'mailbox-blocked') return <MailboxBlocked />
+  if (phase === 'mailbox-blocked') return <MailboxBlocked debug={mailboxDebug} />
   if (phase === 'error') return <ErrorState onRetry={load} />
 
   const profileUrl = flodeskProfileUrl(subscriber)

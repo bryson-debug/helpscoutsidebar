@@ -2,7 +2,7 @@
 
 Support-tooling sidebar app for HelpScout: shows a customer's Flodesk segments inline in the conversation, with add/remove that writes back to Flodesk.
 
-Built against `HelpScoutFlodeskSidebarSpec.md`. Originally scoped to Tarbet Education Network only; later enabled on That Music Teacher, LLC as well, since both mailboxes share the same Flodesk account. Only install on mailboxes whose customers are actually represented in that Flodesk account.
+Built against `HelpScoutFlodeskSidebarSpec.md`. Originally scoped to Tarbet Education Network only; later enabled on That Music Teacher as well, since both mailboxes share the same Flodesk account. Only install on mailboxes whose customers are actually represented in that Flodesk account.
 
 ## Architecture
 
@@ -27,7 +27,7 @@ Required env vars — see `.env.example`. All must be set in Vercel's project se
 ## Resolved during the build/walkthrough
 
 Confirmed against the real Flodesk OpenAPI spec, the Flodesk web app, and live requests:
-- HelpScout's signature shape and query param names (`conversation-id`, `customer-id`, `mailbox-id`, `user-id`, etc.) — confirmed against a real request. The Tarbet Education Network mailbox's numeric ID is `364558`. That Music Teacher, LLC's ID isn't confirmed yet, so it's currently allowed by name only — get its ID from a live request (same way Tarbet's was found) and add it to `ALLOWED_MAILBOX_ID` for a more robust guard.
+- HelpScout's signature shape and query param names (`conversation-id`, `customer-id`, `mailbox-id`, `user-id`, etc.) — confirmed against a real request. Numeric mailbox IDs: Tarbet Education Network = `364558`, That Music Teacher = `317821` (note: the real mailbox name has no ", LLC" suffix, despite that being how it's referred to conversationally).
 - Flodesk's segment add/remove endpoints (`POST`/`DELETE /v1/subscribers/{id_or_email}/segments`, body `{segment_ids: [...]}`) — both confirmed correct as originally implemented.
 - Flodesk rate limits: **100 requests/minute per endpoint** (lower, 20/min, for the batch subscriber endpoint specifically, which this app doesn't use) — comfortably covered by the 60s cache.
 - Flodesk requires a `User-Agent` header on every request (shown in all their curl examples) — added to `lib/flodeskClient.js`.

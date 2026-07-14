@@ -27,19 +27,10 @@ export function ErrorState({ onRetry }) {
   )
 }
 
-export function MailboxBlocked({ debug }) {
+export function MailboxBlocked() {
   return (
     <div className="state">
-      <p className="state__message">This app is only enabled for the Tarbet Education Network mailbox.</p>
-      {debug && (
-        <pre style={{ fontSize: 10, whiteSpace: 'pre-wrap', color: '#9ca3af' }}>
-          received: name={JSON.stringify(debug.mailboxName)} id={JSON.stringify(debug.mailboxId)}
-          {'\n'}
-          configured allowed names: {JSON.stringify(debug.allowedMailboxName)}
-          {'\n'}
-          configured allowed ids: {JSON.stringify(debug.allowedMailboxId)}
-        </pre>
-      )}
+      <p className="state__message">This app is not enabled for this mailbox.</p>
     </div>
   )
 }

@@ -10,12 +10,22 @@ import { Loading, NoRecord, ErrorState, MailboxBlocked } from './components/Stat
 
 const SHOW_LIMIT = 8
 
+function parseList(value) {
+  return (value || '')
+    .split('|')
+    .map((s) => s.trim())
+    .filter(Boolean)
+}
+
 function isAllowedMailbox(mailbox) {
   const { allowedMailboxId, allowedMailboxName } = clientConfig
   if (!mailbox) return true
-  if (allowedMailboxId) return String(mailbox.id) === String(allowedMailboxId)
-  if (allowedMailboxName) return mailbox.name === allowedMailboxName
-  return true
+  const allowedIds = parseList(allowedMailboxId)
+  const allowedNames = parseList(allowedMailboxName)
+  if (!allowedIds.length && !allowedNames.length) return true
+  const idMatch = allowedIds.length > 0 && allowedIds.includes(String(mailbox.id))
+  const nameMatch = allowedNames.length > 0 && allowedNames.includes(mailbox.name)
+  return idMatch || nameMatch
 }
 
 export default function App() {

@@ -1,8 +1,8 @@
 # HelpScout ↔ Flodesk Sidebar
 
-Support-tooling sidebar app for the **Tarbet Education Network** HelpScout mailbox: shows a customer's Flodesk segments inline in the conversation, with add/remove that writes back to Flodesk.
+Support-tooling sidebar app for HelpScout: shows a customer's Flodesk segments inline in the conversation, with add/remove that writes back to Flodesk.
 
-Built against `HelpScoutFlodeskSidebarSpec.md`. This app is scoped to Tarbet Education Network only — it must never be installed on the That Music Teacher, LLC mailbox.
+Built against `HelpScoutFlodeskSidebarSpec.md`. Originally scoped to Tarbet Education Network only; later enabled on That Music Teacher, LLC as well, since both mailboxes share the same Flodesk account. Only install on mailboxes whose customers are actually represented in that Flodesk account.
 
 ## Architecture
 
@@ -12,7 +12,7 @@ Built against `HelpScoutFlodeskSidebarSpec.md`. This app is scoped to Tarbet Edu
   - `api/flodesk/lookup.js` — subscriber + segment lookup (session-token authed).
   - `api/flodesk/segments.js` — add/remove segment (session-token authed, rate-limited, stale-write checked, audit-logged).
 - **Auth model**: HelpScout's signature only covers the initial iframe load. The iframe's own JS calls back to `/api/flodesk/*` using a separate short-lived JWT (`SESSION_TOKEN_SECRET`) minted at that initial load — this is what actually gates the lookup/write endpoints.
-- **Mailbox restriction**: enforced twice — (1) the app should only be installed on the Tarbet Education Network mailbox in HelpScout's Manage > Apps UI, and (2) `lib/mailboxGuard.js` rejects requests server-side if the mailbox doesn't match `ALLOWED_MAILBOX_ID`/`ALLOWED_MAILBOX_NAME`, as a defense-in-depth backstop.
+- **Mailbox restriction**: enforced twice — (1) which mailbox(es) the app is enabled on in HelpScout's Manage > Apps UI, and (2) `lib/mailboxGuard.js` rejects requests server-side if the mailbox doesn't match `ALLOWED_MAILBOX_ID`/`ALLOWED_MAILBOX_NAME`, as a defense-in-depth backstop. Both env vars accept multiple values separated by `|` (not comma, since mailbox names can contain commas) — a request passes if it matches any listed ID or any listed name.
 
 ## Setup
 
@@ -27,7 +27,7 @@ Required env vars — see `.env.example`. All must be set in Vercel's project se
 ## Resolved during the build/walkthrough
 
 Confirmed against the real Flodesk OpenAPI spec, the Flodesk web app, and live requests:
-- HelpScout's signature shape and query param names (`conversation-id`, `customer-id`, `mailbox-id`, `user-id`, etc.) — confirmed against a real request. The Tarbet Education Network mailbox's numeric ID is `364558` — set `ALLOWED_MAILBOX_ID=364558` in Vercel for a more robust guard than name-matching.
+- HelpScout's signature shape and query param names (`conversation-id`, `customer-id`, `mailbox-id`, `user-id`, etc.) — confirmed against a real request. The Tarbet Education Network mailbox's numeric ID is `364558`. That Music Teacher, LLC's ID isn't confirmed yet, so it's currently allowed by name only — get its ID from a live request (same way Tarbet's was found) and add it to `ALLOWED_MAILBOX_ID` for a more robust guard.
 - Flodesk's segment add/remove endpoints (`POST`/`DELETE /v1/subscribers/{id_or_email}/segments`, body `{segment_ids: [...]}`) — both confirmed correct as originally implemented.
 - Flodesk rate limits: **100 requests/minute per endpoint** (lower, 20/min, for the batch subscriber endpoint specifically, which this app doesn't use) — comfortably covered by the 60s cache.
 - Flodesk requires a `User-Agent` header on every request (shown in all their curl examples) — added to `lib/flodeskClient.js`.

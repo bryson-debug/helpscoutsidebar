@@ -86,6 +86,14 @@ export default function App() {
     load()
   }, [load])
 
+  // Re-attach only when `phase` changes the mounted DOM node (loading/error/
+  // etc. render a different element without rootRef) — NOT on every render,
+  // which previously recreated the observer so often that its pending
+  // "size changed" callback could get cancelled before ever firing,
+  // silently under-reporting the app's height. That got worse the more
+  // segments a subscriber had, since more segments means more re-renders
+  // while data loads — ResizeObserver itself already reacts to every actual
+  // size change on its own, so it only needs to be created once per mount.
   useEffect(() => {
     if (!rootRef.current) return
     const observer = new ResizeObserver(() => {
@@ -93,7 +101,7 @@ export default function App() {
     })
     observer.observe(rootRef.current)
     return () => observer.disconnect()
-  })
+  }, [phase])
 
   const currentSegments = subscriber?.segments ?? []
   const sortedSegments = [...currentSegments].sort((a, b) => a.name.localeCompare(b.name))

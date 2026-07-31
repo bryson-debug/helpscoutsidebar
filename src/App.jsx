@@ -96,11 +96,47 @@ export default function App() {
   // size change on its own, so it only needs to be created once per mount.
   useEffect(() => {
     if (!rootRef.current) return
+
+    // The pill list sits right at a width where 1 vs 2 pills fit per row.
+    // HelpScout's own sidebar column (all stacked apps combined) picks up a
+    // scrollbar once its total height passes a threshold, which shaves a
+    // few pixels off every app's available width — including ours — which
+    // is just enough to flip our pill wrapping, which changes our height,
+    // which can flip that scrollbar back off, and so on: a feedback loop
+    // between our report and HelpScout's own layout that shows up as a
+    // continuous twitch between a compact and an expanded layout. We can't
+    // control HelpScout's side of that loop, so instead we make our own
+    // reporting asymmetric: growing is reported right away (never clip
+    // content), but shrinking only gets reported once the smaller size has
+    // actually held for a while — long enough to outlast one oscillation
+    // cycle. A transient dip caused by the loop gets superseded by the next
+    // grow before its shrink timer ever fires, so the loop can't sustain
+    // itself; a genuine shrink (segments actually removed) still reports
+    // once things settle down.
+    let pendingShrink = null
+    let lastReported = null
+
+    const report = (height) => {
+      lastReported = height
+      HelpScout.setAppHeight(height)
+    }
+
     const observer = new ResizeObserver(() => {
-      HelpScout.setAppHeight(rootRef.current.scrollHeight)
+      const height = rootRef.current.scrollHeight
+      if (lastReported === null || height >= lastReported) {
+        clearTimeout(pendingShrink)
+        pendingShrink = null
+        report(height)
+        return
+      }
+      clearTimeout(pendingShrink)
+      pendingShrink = setTimeout(() => report(height), 2000)
     })
     observer.observe(rootRef.current)
-    return () => observer.disconnect()
+    return () => {
+      clearTimeout(pendingShrink)
+      observer.disconnect()
+    }
   }, [phase])
 
   const currentSegments = subscriber?.segments ?? []
